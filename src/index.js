@@ -1,6 +1,6 @@
 import 'axios'
 
-class BigWaffleReader {
+export class BigWaffleReader {
   init (options) {
     const defaults = {
       dataset: 'systema_globalis',
@@ -44,5 +44,3 @@ class BigWaffleReader {
     return new BigWaffleReader()
   }
 }
-
-export default BigWaffleReader
