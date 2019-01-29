@@ -10,6 +10,6 @@ module.exports = {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'var',
-    library: 'BigWaffleReader'
+    libraryExport: 'default'
   }
 };

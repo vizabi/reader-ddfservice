@@ -1,4 +1,3 @@
-var BigWaffleReader =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1986,12 +1985,12 @@ process.umask = function() { return 0; };
 /*!**********************!*\
   !*** ./src/index.js ***!
   \**********************/
-/*! exports provided: BigWaffleReader */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BigWaffleReader", function() { return BigWaffleReader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BigWaffleReader; });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 
@@ -2040,6 +2039,8 @@ class BigWaffleReader {
     return new BigWaffleReader()
   }
 }
+
+
 
 
 /***/ })
