@@ -45,4 +45,4 @@ class BigWaffleReader {
   }
 }
 
-export { BigWaffleReader as default }
+export function newReader() { return BigWaffleReader.newReader() } 
