@@ -2045,4 +2045,4 @@ class BigWaffleReader {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=ddf-big-waffle-reader.js.map
+//# sourceMappingURL=vizabi-ddfbw-reader.js.map
