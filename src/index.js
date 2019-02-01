@@ -39,10 +39,18 @@ class BigWaffleReader {
     //TODO: Add some basic validation ??
     return encodeURIComponent(JSON.stringify(query))
   }
-
-  static newReader () {
-    return new BigWaffleReader()
-  }
 }
 
-export function newReader() { return BigWaffleReader.newReader() } 
+module.exports = () => {
+  /*
+   * The Vizabi "class extension" code requires that we return an object with the public methods as ownProperties
+   *
+   */
+  const reader = {}
+  Object.getOwnPropertyNames(BigWaffleReader.prototype).forEach(method => {
+    if (method !== 'constructor') {
+      reader[method] = BigWaffleReader.prototype[method].bind(reader)
+    }
+  })
+  return reader
+}
