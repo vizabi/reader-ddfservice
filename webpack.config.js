@@ -9,7 +9,15 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
-    libraryTarget: 'var',
-    library: 'BigWafflReader'
-  }
+    libraryTarget: 'umd',
+    library: 'BigWaffleReader'
+  },
+  externals: {
+    axios: {
+      commonjs: 'axios',
+      commonjs2: 'axios',
+      amd: 'axios',
+      root: 'axios'
+     }
+   }
 };

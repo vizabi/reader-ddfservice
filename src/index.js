@@ -35,15 +35,19 @@ class BigWaffleReader {
       })
   }
 
-  _queryAsParams(query) {
+  _queryAsParams (query) {
     //TODO: Add some basic validation ??
     return encodeURIComponent(JSON.stringify(query))
   }
 }
 
-module.exports = () => {
+export function getReader() {
   /*
-   * The Vizabi "class extension" code requires that we return an object with the public methods as ownProperties
+   * Return an object that exposes the Reader interface.
+   *
+   * The Vizabi "class extension" code requires that we return 
+   * an object with the public methods of the BigWaffleReader class
+   * as ownProperties
    *
    */
   const reader = {}
