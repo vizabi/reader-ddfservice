@@ -134,7 +134,7 @@ class BigWaffleReader {
           return data.map(row => row.reduce((obj, value, headerIdx) => {
             obj[header[headerIdx]] = value
             return obj
-          }), {})
+          }, {}))
         } else {
           const err = new Error(response.statusTxt || `DDF Service responded with ${response.status}`)
           err.code = `HTTP_${response.status}`
