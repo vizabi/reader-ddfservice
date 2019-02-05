@@ -19,6 +19,7 @@ class BigWaffleReader {
           /*
            * Return an array of objects
           */
+          const data = response.data
           const header = data.shift()
           return data.map(row => row.reduce((obj, value, headerIdx) => {
             obj[header[headerIdx]] = value
