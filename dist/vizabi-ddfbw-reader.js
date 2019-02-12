@@ -132,7 +132,9 @@ class BigWaffleReader {
           const data = response.data
           const header = data.shift()
           return data.map(row => row.reduce((obj, value, headerIdx) => {
-            obj[header[headerIdx]] = value
+            const field = header[headerIdx]
+            const parser = parsers[field]
+            obj[field] = parser ? parser(value) : value
             return obj
           }, {}))
         } else {
