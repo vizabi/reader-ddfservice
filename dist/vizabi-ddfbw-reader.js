@@ -120,6 +120,10 @@ class BigWaffleReader {
     this.service = options.service || defaults.service
   }
 
+  getAsset (filePath, repositoryPath = '') {
+
+  }
+  
   read (query, parsers) {
     // For now parsers are ignored
     const url = `${this.service}/${this.dataset}?${this._queryAsParams(query)}`
@@ -130,8 +134,8 @@ class BigWaffleReader {
            * Return an array of objects
           */
           const data = response.data
-          const header = data.shift()
-          return data.map(row => row.reduce((obj, value, headerIdx) => {
+          const header = data.header
+          return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
             const field = header[headerIdx]
             const parser = parsers[field]
             obj[field] = parser ? parser(value) : value
