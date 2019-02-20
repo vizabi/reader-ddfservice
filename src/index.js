@@ -1,4 +1,4 @@
-import 'axios'
+import 'whatwg-fetch' // Polyfill for fetch
 import * as Urlon from 'urlon';
 
 class BigWaffleReader {
@@ -18,35 +18,34 @@ class BigWaffleReader {
   read (query, parsers) {
     // For now parsers are ignored
     const url = `${this.service}/${this.dataset}?${this._queryAsParams(query)}`
-    return axios.get(url)
+    return fetch(url, { cache: "no-store", credentials: 'same-origin', redirect: "follow" })
       .then(response => {
-        if (response.status === 200) {
+        if (response.ok) {
           /*
            * Return an array of objects
           */
-          const data = response.data
-          const header = data.header
-          return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
-            const field = header[headerIdx]
-            const parser = parsers[field]
-            obj[field] = parser ? parser(value) : value
-            return obj
-          }, {}))
+          return response.json()
+            .then(data => {
+              const header = data.header
+              return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
+                const field = header[headerIdx]
+                const parser = parsers[field]
+                obj[field] = parser ? parser(value) : value
+                return obj
+              }, {}))
+            })
         } else {
-          const err = new Error(response.statusTxt || `DDF Service responded with ${response.status}`)
-          err.code = `HTTP_${response.status}`
-          return err
+          return response.text()
+            .then(txt => {
+              const err = new Error(response.text() || `DDF Service responded with ${response.status}`)
+              err.code = `HTTP_${response.status}`
+              return err
+            })
         }
       })
       .catch(error => {
-        if (error.response) {
-          const err = new Error(response.statusTxt || `DDF Service responded with ${response.status}`)
-          err.code = `HTTP_${response.status}`
-          return err
-        } else {
-          console.error(error)
-          return error
-        }
+        console.error(error)
+        return error
       })
   }
 
