@@ -298,7 +298,7 @@ class BigWaffleReader {
 
   _queryAsParams (query) {
     //TODO: Add some basic validation ??
-    return urlon.stringify(query) // encodeURIComponent(JSON.stringify(query))
+    return urlon__WEBPACK_IMPORTED_MODULE_1__["stringify"](query) // encodeURIComponent(JSON.stringify(query))
   }
 }
 

@@ -1,5 +1,5 @@
 import 'axios'
-import 'urlon'
+import * as Urlon from 'urlon';
 
 class BigWaffleReader {
   init (options) {
@@ -52,7 +52,7 @@ class BigWaffleReader {
 
   _queryAsParams (query) {
     //TODO: Add some basic validation ??
-    return urlon.stringify(query) // encodeURIComponent(JSON.stringify(query))
+    return Urlon.stringify(query) // encodeURIComponent(JSON.stringify(query))
   }
 }
 
