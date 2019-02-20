@@ -9,6 +9,7 @@ class BigWaffleReader {
     }
     this.dataset = options.dataset || defaults.dataset
     this.service = options.service || defaults.service
+    this.version = options.version
   }
 
   getAsset (filePath, repositoryPath = '') {
@@ -17,7 +18,7 @@ class BigWaffleReader {
   
   read (query, parsers) {
     // For now parsers are ignored
-    const url = `${this.service}/${this.dataset}?${this._queryAsParams(query)}`
+    const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
     return fetch(url, { cache: "no-store", credentials: 'same-origin', redirect: "follow" })
       .then(response => {
         if (response.ok) {
@@ -26,6 +27,9 @@ class BigWaffleReader {
           */
           return response.json()
             .then(data => {
+              if (data.version) {
+                this.version = data.version
+              }
               const header = data.header
               return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
                 const field = header[headerIdx]
