@@ -791,8 +791,33 @@ class BigWaffleReader {
     this.version = options.version
   }
 
-  getAsset (filePath, repositoryPath = '') {
-
+  getAsset (filePath) {
+    const url = `${this.service}/${this.dataset}/${this.version}/assets/${filePath}`
+    return fetch(url, { credentials: 'same-origin', redirect: "follow" })
+      .then(response => {
+        if (response.ok) {
+          return response.blob()
+            .then(data => {
+              const contentType = response.headers.get("Content-Type")
+              if (/application\/json/.test(contentType)) {
+                return JSON.parse(data)
+              } else {
+                return data
+              }
+            })
+        } else {
+          return response.text()
+            .then(txt => {
+              const err = new Error(response.text() || `DDF Service responded with ${response.status}`)
+              err.code = `HTTP_${response.status}`
+              return err
+            })
+        }
+      })
+      .catch(error => {
+        console.error(error)
+        return error
+      })
   }
   
   read (query, parsers) {
