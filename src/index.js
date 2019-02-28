@@ -13,19 +13,19 @@ class BigWaffleReader {
   }
 
   getAsset (filePath) {
-    const url = `${this.service}/${this.dataset}/${this.version}/assets/${filePath}`
+    const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
+    const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}/assets/${asset}`
     return fetch(url, { credentials: 'same-origin', redirect: "follow" })
       .then(response => {
         if (response.ok) {
-          return response.blob()
-            .then(data => {
-              const contentType = response.headers.get("Content-Type")
-              if (/application\/json/.test(contentType)) {
-                return JSON.parse(data)
-              } else {
-                return data
-              }
-            })
+          const contentType = response.headers.get("Content-Type")
+          if (/application\/json/.test(contentType)) {
+            return response.json()
+              .then(data => data)
+          } else {
+            return response.blob() // in case of an image or so ?
+              .then(data => data)
+          }
         } else {
           return response.text()
             .then(txt => {
@@ -42,9 +42,8 @@ class BigWaffleReader {
   }
   
   read (query, parsers) {
-    // For now parsers are ignored
     const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
-    return fetch(url, { cache: "no-store", credentials: 'same-origin', redirect: "follow" })
+    return fetch(url, { credentials: 'same-origin', redirect: "follow" })
       .then(response => {
         if (response.ok) {
           /*
