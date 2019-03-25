@@ -1,6 +1,7 @@
 *~
 .*
 !.gitignore
+!.npmignore
 node_modules
 .env
 npm-debug.log
