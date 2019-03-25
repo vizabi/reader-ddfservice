@@ -1,11 +1,11 @@
 import 'whatwg-fetch' // Polyfill for fetch
 import * as Urlon from 'urlon';
 
-class BigWaffleReader {
+class DDFServiceReader {
   init (options) {
     const defaults = {
       dataset: 'systema_globalis',
-      service: 'http://bigwaffle.gapminder.org'
+      service: 'http://big-waffle.gapminder.org'
     }
     this.dataset = options.dataset || defaults.dataset
     this.service = options.service || defaults.service
@@ -79,7 +79,7 @@ class BigWaffleReader {
 
   _queryAsParams (query) {
     //TODO: Add some basic validation ??
-    return Urlon.stringify(query) // encodeURIComponent(JSON.stringify(query))
+    return Urlon.stringify(query) // could also do encodeURIComponent(JSON.stringify(query))
   }
 }
 
@@ -88,14 +88,14 @@ export function getReader() {
    * Return an object that exposes the Reader interface.
    *
    * The Vizabi "class extension" code requires that we return 
-   * an object with the public methods of the BigWaffleReader class
+   * an object with the public methods of the DDFServiceReader class
    * as ownProperties
    *
    */
   const reader = {}
-  Object.getOwnPropertyNames(BigWaffleReader.prototype).forEach(method => {
+  Object.getOwnPropertyNames(DDFServiceReader.prototype).forEach(method => {
     if (method !== 'constructor') {
-      reader[method] = BigWaffleReader.prototype[method].bind(reader)
+      reader[method] = DDFServiceReader.prototype[method].bind(reader)
     }
   })
   return reader
