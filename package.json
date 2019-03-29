@@ -1,7 +1,8 @@
 {
   "name": "vizabi-ddfservice-reader",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Vizabi reader for a DDF Service",
+  "main": "dist/vizabi-ddfservice-reader.js",
   "dependencies": {
     "urlon": "^2.0.1",
     "whatwg-fetch": "^3.0.0"

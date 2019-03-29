@@ -6,7 +6,7 @@ This Vizabi DDF Service Reader is used to connect your Vizabi visualization to d
 
 To use the reader include the script:
 
-    <script src="dist/ vizabi-ddf-service-reader.js"></script>
+    <script src="dist/vizabi-ddfservice-reader.js"></script>
 
 Then simply create an instance and pass it to Vizabi. 
 

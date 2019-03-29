@@ -2,4 +2,5 @@
 .*
 /package-lock.json
 webpack.config.js
+test.html
 !dist

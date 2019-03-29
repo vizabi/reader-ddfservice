@@ -3,13 +3,17 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    'vizabi-ddf-service-reader': './src/index.js'
+    'vizabi-ddfservice-reader': './src/index.js'
   },
   devtool: 'source-map',
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist'),
     libraryTarget: 'umd',
-    library: 'DDFServiceReader'
-  },
+    library: {
+      root: 'DDFServiceReader',
+      commonjs: 'vizabi-ddfservice-reader'
+    },
+    globalObject: 'this'
+  }
 };
