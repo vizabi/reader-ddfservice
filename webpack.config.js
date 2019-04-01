@@ -1,7 +1,8 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
+  target: 'web',
   entry: {
     'vizabi-ddfservice-reader': './src/index.js'
   },
@@ -15,5 +16,19 @@ module.exports = {
       commonjs: 'vizabi-ddfservice-reader'
     },
     globalObject: 'this'
-  }
-};
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
+    ]
+  },
+  resolve: { extensions: ['.js'] }
+}
