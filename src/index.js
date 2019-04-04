@@ -55,6 +55,12 @@ export const getReader = () => {
                 if (data.version) {
                   this.version = data.version
                 }
+                ['info', 'warn', 'error'].forEach(level => {
+                  (data[level] || []).forEach(logRecord => {
+                    const msg = logRecord && logRecord.msg ? logRecord.msg : logRecord
+                    console[level](msg)
+                  })
+                })
                 const header = data.header
                 return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
                   const field = header[headerIdx]
@@ -79,8 +85,14 @@ export const getReader = () => {
     },
 
     _queryAsParams (query) {
-      //TODO: Add some basic validation ??
-      return Urlon.stringify(query) // could also do encodeURIComponent(JSON.stringify(query))
+      // Only include properties specidied in the DDF Query Language specification
+      const allowedProperties = ['language', 'select', 'from', 'where', 'join', 'order_by']
+      const cleanQuery = {}
+      allowedProperties.filter(prop => query[prop]).forEach(prop => {
+        cleanQuery[prop] = query[prop]
+      })
+      
+      return Urlon.stringify(cleanQuery) // could also do encodeURIComponent(JSON.stringify(query))
     }
   }
 }
