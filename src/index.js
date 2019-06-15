@@ -11,6 +11,10 @@ export const getReader = () => {
       this.dataset = options.dataset || defaults.dataset
       this.service = options.service || defaults.service
       this.version = options.version
+      this.headers = {}
+      if (options.password) {
+        this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
+      }
     },
 
     getAsset (filePath) {
@@ -44,7 +48,7 @@ export const getReader = () => {
     
     read (query, parsers) {
       const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
-      return fetch(url, { credentials: 'same-origin', redirect: "follow" })
+      return fetch(url, { credentials: 'same-origin', headers: this.headers, redirect: "follow" })
         .then(response => {
           if (response.ok) {
             /*
