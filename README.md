@@ -19,7 +19,8 @@ Then configure Vizabi to provide the reader with the URL of the DDF Service and 
     data: {
         "reader": "ddfbw",
         "service": "https://big-waffle.gapminder.org",
-        "dataset": "population"
+        "dataset": "population",
+        "version": "4ced761"
     },
     locale: {
         "filePath": "//s3-eu-west-1.amazonaws.com/static.gapminderdev.org/vizabi/develop/assets/translation/"
