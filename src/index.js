@@ -1,16 +1,17 @@
 import 'whatwg-fetch' // Polyfill for fetch
-import * as Urlon from 'urlon';
+import moment from 'moment'
+import * as Urlon from 'urlon'
 
-export const getReader = () => {
+export const getReader = (options) => {
   return {
-    init (options) {
+    init (dataset) {
       const defaults = {
-        dataset: 'systema_globalis',
-        service: 'http://big-waffle.gapminder.org'
+        service: 'http://big-waffle.gapminder.org',
+        dataset: { name: 'unhcr' }
       }
-      this.dataset = options.dataset || defaults.dataset
       this.service = options.service || defaults.service
-      this.version = options.version
+      this.dataset = dataset.name || defaults.dataset.name
+      this.version = dataset.version || defaults.dataset.version
       this.headers = {}
       if (options.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
@@ -46,7 +47,38 @@ export const getReader = () => {
         })
     },
     
-    read (query, parsers) {
+    parsers: {
+      time: timeString => {
+        const timeRegEx = /^([0-9]{4})(w[0-9]{2}|q[0-9]{1})?([0-9]{2})?([0-9]{2})?$/
+        if (Number.isInteger(timeString)) { // the timeString is probably a year
+          return timeString >= 0 && timeString < 10000 ? new Date(timeString, 11, 31) : undefined
+        } else if (typeof timeString !== 'string') {
+          return undefined
+        } else {
+           const match = timeRegEx.exec(timeString)
+           if (match) { // match[1] = year, match[2] = week or quarter, match[3] = month, match[4] = day
+             if (match[4]) {
+               return moment.utc(timeString, 'YYYYMMDD').toDate()
+             } else if (match[3]) {
+              return moment.utc(timeString, 'YYYYMM').toDate()
+             } else if (match[2].length === 2) {
+              return moment.utc(timeString, 'YYYYqQ').toDate()
+             } else if (match[2].length === 3) {
+              return moment.utc(timeString.replace('w', '.'), 'YYYY.WW').toDate()  // unfortunately 'w' is a token in moment
+             } else if (match[1]) {
+              return moment.utc(timeString, 'YYYY').toDate()
+             }
+           }
+        }
+      },
+      year: timeString => moment.utc(timeString, 'YYYY').toDate(),
+      month: timeString => moment.utc(timeString, 'YYYYMM').toDate(),
+      day: timeString => moment.utc(timeString, 'YYYYMMDD').toDate(),
+      week: timeString => moment.utc(timeString.replace('w', '.'), 'YYYY.WW').toDate(),  // unfortunately 'w' is a token in moment
+      quarter: timeString => moment.utc(timeString, 'YYYYqQ').toDate()
+    },
+
+    read (query) {
       const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
       return fetch(url, { credentials: 'same-origin', headers: this.headers, redirect: "follow" })
         .then(response => {
@@ -66,10 +98,10 @@ export const getReader = () => {
                   })
                 })
                 const header = data.header
+                const parsers = header.map(h => this.parsers[h])
                 return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
                   const field = header[headerIdx]
-                  const parser = parsers[field]
-                  obj[field] = parser ? parser(value) : value
+                  obj[field] = parsers[headerIdx] ? parsers[headerIdx](value) : value
                   return obj
                 }, {}))
               })
