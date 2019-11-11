@@ -13,9 +13,10 @@ export const getReader = (options) => {
       this.dataset = dataset.name || defaults.dataset.name
       this.version = dataset.version || defaults.dataset.version
       this.headers = {}
-      if (options.password) {
+      if (dataset.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
       }
+      Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
     },
 
     getAsset (filePath) {
