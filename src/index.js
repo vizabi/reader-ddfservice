@@ -52,7 +52,7 @@ export const getReader = (options) => {
       time: timeString => {
         const timeRegEx = /^([0-9]{4})(w[0-9]{2}|q[0-9]{1})?([0-9]{2})?([0-9]{2})?$/
         if (Number.isInteger(timeString)) { // the timeString is probably a year
-          return timeString >= 0 && timeString < 10000 ? new Date(timeString, 11, 31) : undefined
+          return timeString >= 0 && timeString < 10000 ? moment.utc({year: timeString, month: 0, day: 1}).toDate() : undefined
         } else if (typeof timeString !== 'string') {
           return undefined
         } else {
