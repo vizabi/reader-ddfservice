@@ -2,16 +2,15 @@ import 'whatwg-fetch' // Polyfill for fetch
 import moment from 'moment'
 import * as Urlon from 'urlon'
 
-export const getReader = (options) => {
+export const getReader = (options = {}) => {
   return {
     init (dataset) {
       const defaults = {
-        service: 'http://big-waffle.gapminder.org',
-        dataset: { name: 'unhcr' }
+        service: 'https://big-waffle.gapminder.org'
       }
-      this.service = options.service || defaults.service
-      this.dataset = dataset.name || defaults.dataset.name
-      this.version = dataset.version || defaults.dataset.version
+      this.service = options.service || dataset.service || defaults.service
+      this.dataset = dataset.name || defaults.name
+      this.version = dataset.version || defaults.version
       this.headers = {}
       if (dataset.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
