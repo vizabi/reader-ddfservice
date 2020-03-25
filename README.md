@@ -6,7 +6,7 @@ This Vizabi DDF Service Reader is used to connect your Vizabi visualization to d
 
 To use the reader include the script:
 
-    <script src="dist/vizabi-ddfservice-reader.js"></script>
+    <script src="vizabi-ddfservice-reader.js"></script>
 
 Then simply create an instance and pass it to Vizabi. 
 
@@ -28,3 +28,30 @@ Then configure Vizabi to provide the reader with the URL of the DDF Service and 
     });
 
     Vizabi("PopByAge", document.getElementById("vizabi"), ConfigPopByAge);
+
+
+## Usage without vizabi
+[jsfiddle example](https://jsfiddle.net/7gn91sr0/3/)
+
+```
+var ddfReader = DDFServiceReader.getReader();
+
+
+ddfReader.init({
+  service: 'https://big-waffle.gapminder.org', 
+  name: "wdi-master"
+});
+
+
+ddfReader.read({
+	select: {
+  	key: ["geo", "time"], 
+  	value: ["sh_sta_brtc_zs"]
+  }, 
+  where: {
+  	geo: {"$in": ["rwa"]}},
+    from: "datapoints"
+  })
+.then(console.log);
+
+```
