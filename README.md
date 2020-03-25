@@ -44,14 +44,14 @@ ddfReader.init({
 
 
 ddfReader.read({
-	select: {
-  	key: ["geo", "time"], 
-  	value: ["sh_sta_brtc_zs"]
+  select: {
+    key: ["geo", "time"], 
+    value: ["sh_sta_brtc_zs"]
   }, 
   where: {
-  	geo: {"$in": ["rwa"]}},
+    geo: {"$in": ["rwa"]}},
     from: "datapoints"
   })
-.then(console.log);
+  .then(console.log);
 
 ```
