@@ -1,5 +1,4 @@
 const path = require('path')
-const MomentLocalesPlugin = require('moment-locales-webpack-plugin')
 
 module.exports = {
   mode: 'development',
@@ -7,10 +6,6 @@ module.exports = {
   entry: {
     'vizabi-ddfservice-reader': './src/index.js'
   },
-  plugins: [
-    // To strip all locales except “en”
-    new MomentLocalesPlugin()
-  ],
   devtool: 'source-map',
   output: {
     filename: '[name].js',

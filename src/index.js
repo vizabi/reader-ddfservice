@@ -1,6 +1,14 @@
 import 'whatwg-fetch' // Polyfill for fetch
-import moment from 'moment'
+import { utcParse } from 'd3-time-format'
 import * as Urlon from 'urlon'
+
+const defaultParsers = {
+  'YYYYMMDD': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(4,6), timeString.slice(-2))),
+  'YYYYMM': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(-2))),
+  'YYYY': timeString => new Date(Date.UTC(timeString)),
+  'YYYYqQ': utcParse("%Yq%q"),
+  'YYYYwWW': utcParse("%Yw%W")
+};
 
 export const getReader = (options = {}) => {
   return {
@@ -51,31 +59,31 @@ export const getReader = (options = {}) => {
       time: timeString => {
         const timeRegEx = /^([0-9]{4})(w[0-9]{2}|q[0-9]{1})?([0-9]{2})?([0-9]{2})?$/
         if (Number.isInteger(timeString)) { // the timeString is probably a year
-          return timeString >= 0 && timeString < 10000 ? moment.utc({year: timeString, month: 0, day: 1}).toDate() : undefined
+          return timeString >= 0 && timeString < 10000 ? defaultParsers['YYYY'](timeString) : undefined
         } else if (typeof timeString !== 'string') {
           return undefined
         } else {
            const match = timeRegEx.exec(timeString)
            if (match) { // match[1] = year, match[2] = week or quarter, match[3] = month, match[4] = day
              if (match[4]) {
-               return moment.utc(timeString, 'YYYYMMDD').toDate()
+               return defaultParsers['YYYYMMDD'](timeString)
              } else if (match[3]) {
-              return moment.utc(timeString, 'YYYYMM').toDate()
+              return defaultParsers['YYYYMM'](timeString)
              } else if (match[2].length === 2) {
-              return moment.utc(timeString, 'YYYYqQ').toDate()
+              return defaultParsers['YYYYqQ'](timeString)
              } else if (match[2].length === 3) {
-              return moment.utc(timeString.replace('w', '.'), 'YYYY.WW').toDate()  // unfortunately 'w' is a token in moment
+              return defaultParsers['YYYYwWW'](timeString)
              } else if (match[1]) {
-              return moment.utc(timeString, 'YYYY').toDate()
+              return defaultParsers['YYYY'](timeString)
              }
            }
         }
       },
-      year: timeString => moment.utc(timeString, 'YYYY').toDate(),
-      month: timeString => moment.utc(timeString, 'YYYYMM').toDate(),
-      day: timeString => moment.utc(timeString, 'YYYYMMDD').toDate(),
-      week: timeString => moment.utc(timeString.replace('w', '.'), 'YYYY.WW').toDate(),  // unfortunately 'w' is a token in moment
-      quarter: timeString => moment.utc(timeString, 'YYYYqQ').toDate()
+      year: timeString => defaultParsers['YYYY'](timeString),
+      month: timeString => defaultParsers['YYYYMM'](timeString),
+      day: timeString => defaultParsers['YYYYMMDD'](timeString),
+      week: timeString => defaultParsers['YYYYwWW'](timeString),
+      quarter: timeString => defaultParsers['YYYYqQ'](timeString)
     },
 
     read (query) {
