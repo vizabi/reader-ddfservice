@@ -1,20 +1,29 @@
 import 'whatwg-fetch' // Polyfill for fetch
-import * as Urlon from 'urlon';
+import { utcParse } from 'd3-time-format'
+import * as Urlon from 'urlon'
 
-export const getReader = () => {
+const defaultParsers = {
+  'YYYYMMDD': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(4,6), timeString.slice(-2))),
+  'YYYYMM': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(-2))),
+  'YYYY': timeString => new Date(Date.UTC(timeString)),
+  'YYYYqQ': utcParse("%Yq%q"),
+  'YYYYwWW': utcParse("%Yw%W")
+};
+
+export const getReader = (options = {}) => {
   return {
-    init (options) {
+    init (dataset) {
       const defaults = {
-        dataset: 'systema_globalis',
-        service: 'http://big-waffle.gapminder.org'
+        service: 'https://big-waffle.gapminder.org'
       }
-      this.dataset = options.dataset || defaults.dataset
-      this.service = options.service || defaults.service
-      this.version = options.version
+      this.service = options.service || dataset.service || defaults.service
+      this.dataset = dataset.name || defaults.name
+      this.version = dataset.version || defaults.version
       this.headers = {}
-      if (options.password) {
+      if (dataset.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
       }
+      Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
     },
 
     getAsset (filePath) {
@@ -46,7 +55,38 @@ export const getReader = () => {
         })
     },
     
-    read (query, parsers) {
+    parsers: {
+      time: timeString => {
+        const timeRegEx = /^([0-9]{4})(w[0-9]{2}|q[0-9]{1})?([0-9]{2})?([0-9]{2})?$/
+        if (Number.isInteger(timeString)) { // the timeString is probably a year
+          return timeString >= 0 && timeString < 10000 ? defaultParsers['YYYY'](timeString) : undefined
+        } else if (typeof timeString !== 'string') {
+          return undefined
+        } else {
+           const match = timeRegEx.exec(timeString)
+           if (match) { // match[1] = year, match[2] = week or quarter, match[3] = month, match[4] = day
+             if (match[4]) {
+               return defaultParsers['YYYYMMDD'](timeString)
+             } else if (match[3]) {
+              return defaultParsers['YYYYMM'](timeString)
+             } else if (match[2].length === 2) {
+              return defaultParsers['YYYYqQ'](timeString)
+             } else if (match[2].length === 3) {
+              return defaultParsers['YYYYwWW'](timeString)
+             } else if (match[1]) {
+              return defaultParsers['YYYY'](timeString)
+             }
+           }
+        }
+      },
+      year: timeString => defaultParsers['YYYY'](timeString),
+      month: timeString => defaultParsers['YYYYMM'](timeString),
+      day: timeString => defaultParsers['YYYYMMDD'](timeString),
+      week: timeString => defaultParsers['YYYYwWW'](timeString),
+      quarter: timeString => defaultParsers['YYYYqQ'](timeString)
+    },
+
+    read (query) {
       const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
       return fetch(url, { credentials: 'same-origin', headers: this.headers, redirect: "follow" })
         .then(response => {
@@ -66,10 +106,10 @@ export const getReader = () => {
                   })
                 })
                 const header = data.header
+                const parsers = header.map(h => this.parsers[h])
                 return (data.rows || []).map(row => row.reduce((obj, value, headerIdx) => {
                   const field = header[headerIdx]
-                  const parser = parsers[field]
-                  obj[field] = parser ? parser(value) : value
+                  obj[field] = parsers[headerIdx] ? parsers[headerIdx](value) : value
                   return obj
                 }, {}))
               })

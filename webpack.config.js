@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   target: 'web',
   entry: {
     'vizabi-ddfservice-reader': './src/index.js'
