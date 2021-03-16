@@ -5,7 +5,7 @@ import * as Urlon from 'urlon'
 const defaultParsers = {
   'YYYYMMDD': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(4,6), timeString.slice(-2))),
   'YYYYMM': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(-2))),
-  'YYYY': timeString => new Date(Date.UTC(timeString)),
+  'YYYY': timeString => new Date(Date.UTC(timeString), 0),
   'YYYYqQ': utcParse("%Yq%q"),
   'YYYYwWW': utcParse("%Yw%W")
 };
