@@ -50,8 +50,10 @@ export const getReader = (options = {}) => {
           }
         })
         .catch(error => {
-          console.error(error)
-          return error
+          error.name = "reader/error/asset";
+          error.details = asset;
+          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          throw error;
         })
     },
     
@@ -123,8 +125,10 @@ export const getReader = (options = {}) => {
           }
         })
         .catch(error => {
-          console.error(error)
-          return error
+          error.name = "reader/error/generic";
+          error.details = query;
+          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          throw error;
         })
     },
 
