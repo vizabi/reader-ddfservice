@@ -52,6 +52,7 @@ export const getReader = (options = {}) => {
         .catch(error => {
           error.name = "reader/error/asset";
           error.details = asset;
+          error.message = "connection/error";
           error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
           throw error;
         })
@@ -127,6 +128,7 @@ export const getReader = (options = {}) => {
         .catch(error => {
           error.name = "reader/error/generic";
           error.details = query;
+          error.message = "connection/error";
           error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
           throw error;
         })
