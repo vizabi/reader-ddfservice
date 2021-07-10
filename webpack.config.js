@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
   target: 'web',
   entry: {
-    'vizabi-ddfservice-reader': './src/index.js'
+    'reader-ddfservice': './src/index.js'
   },
   devtool: 'source-map',
   output: {
@@ -13,7 +13,7 @@ module.exports = {
     libraryTarget: 'umd',
     library: {
       root: 'DDFServiceReader',
-      commonjs: 'vizabi-ddfservice-reader'
+      commonjs: 'reader-ddfservice'
     },
     globalObject: 'this'
   },

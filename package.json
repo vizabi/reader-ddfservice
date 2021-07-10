@@ -1,8 +1,11 @@
 {
-  "name": "vizabi-ddfservice-reader",
+  "name": "@vizabi/reader-ddfservice",
   "version": "2.2.0",
   "description": "Vizabi reader for a DDF Service",
-  "browser": "dist/vizabi-ddfservice-reader.js",
+  "browser": "dist/reader-ddfservice.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "urlon": "^2.0.1",
     "whatwg-fetch": "^3.0.0",
@@ -22,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vizabi/vizabi-ddfservice-reader.git"
+    "url": "git+https://github.com/vizabi/reader-ddfservice.git"
   },
   "author": "Robert Aarts <robert@gapminder.org> (http://www.gapminder.org)",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/vizabi/vizabi-ddfservice-reader/issues"
+    "url": "https://github.com/vizabi/reader-ddfservice/issues"
   },
-  "homepage": "https://github.com/vizabi/vizabi-ddfservice-reader#readme"
+  "homepage": "https://github.com/vizabi/reader-ddfservice#readme"
 }
