@@ -2,10 +2,12 @@ import 'whatwg-fetch' // Polyfill for fetch
 import { utcParse } from 'd3-time-format'
 import * as Urlon from 'urlon'
 
+// Time parsing must follow DDF specs here
+// https://docs.google.com/document/d/1Cd2kEH5w3SRJYaDcu-M4dU5SY8No84T3g-QlNSW6pIE/edit#heading=h.oafc7aswaafy
 const defaultParsers = {
-  'YYYYMMDD': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(4,6), timeString.slice(-2))),
-  'YYYYMM': timeString => new Date(Date.UTC(timeString.slice(0,4), timeString.slice(-2))),
-  'YYYY': timeString => new Date(Date.UTC(timeString, 0)),
+  'YYYYMMDD': t => new Date(Date.UTC(Math.floor(t/10000), Math.floor((t % 10000)/100) - 1, t % 100)),
+  'YYYY-MM': t => new Date(Date.UTC(+t.slice(0,4), +t.slice(-2) - 1)),
+  'YYYY': t => new Date(Date.UTC(t, 0)),
   'YYYYqQ': utcParse("%Yq%q"),
   'YYYYwWW': utcParse("%Yw%W")
 };
@@ -59,34 +61,37 @@ export const getReader = (options = {}) => {
     },
     
     parsers: {
-      time: timeString => {
-        const timeRegEx = /^([0-9]{4})(w[0-9]{2}|q[0-9]{1})?([0-9]{2})?([0-9]{2})?$/
-        if (Number.isInteger(timeString)) { // the timeString is probably a year
-          return timeString >= 0 && timeString < 10000 ? defaultParsers['YYYY'](timeString) : undefined
-        } else if (typeof timeString !== 'string') {
-          return undefined
+      time: timeValue => {       
+        // json() parsing in fetch makes all time values integers except weeks and quarters
+        if (Number.isInteger(timeValue)) {
+          if (timeValue >= 0 && timeValue < 10000) 
+            return defaultParsers['YYYY'](timeValue);        
+          
+          if (timeValue >= 1000000 && timeValue < 100000000) 
+            return defaultParsers['YYYYMMDD'](timeValue);
+
+        } else if (typeof timeValue == 'string') {
+
+          if (timeValue[4] === "-" && timeValue.length == 7) 
+          return defaultParsers['YYYY-MM'](timeValue);
+
+          if (timeValue[4] === "q" || timeValue[4] === "Q") 
+            return defaultParsers['YYYYqQ'](timeValue);
+
+          if (timeValue[4] === "w" || timeValue[4] === "W") 
+            return defaultParsers['YYYYwWW'](timeValue);
+
         } else {
-           const match = timeRegEx.exec(timeString)
-           if (match) { // match[1] = year, match[2] = week or quarter, match[3] = month, match[4] = day
-             if (match[4]) {
-               return defaultParsers['YYYYMMDD'](timeString)
-             } else if (match[3]) {
-              return defaultParsers['YYYYMM'](timeString)
-             } else if (match[2].length === 2) {
-              return defaultParsers['YYYYqQ'](timeString)
-             } else if (match[2].length === 3) {
-              return defaultParsers['YYYYwWW'](timeString)
-             } else if (match[1]) {
-              return defaultParsers['YYYY'](timeString)
-             }
-           }
+          
+         return undefined
+
         }
       },
-      year: timeString => defaultParsers['YYYY'](timeString),
-      month: timeString => defaultParsers['YYYYMM'](timeString),
-      day: timeString => defaultParsers['YYYYMMDD'](timeString),
-      week: timeString => defaultParsers['YYYYwWW'](timeString),
-      quarter: timeString => defaultParsers['YYYYqQ'](timeString)
+      year: timeValue => defaultParsers['YYYY'](timeValue),
+      month: timeValue => defaultParsers['YYYY-MM'](timeValue),
+      day: timeValue => defaultParsers['YYYYMMDD'](timeValue),
+      week: timeValue => defaultParsers['YYYYwWW'](timeValue),
+      quarter: timeValue => defaultParsers['YYYYqQ'](timeValue)
     },
 
     read (query) {
