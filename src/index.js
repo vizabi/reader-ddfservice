@@ -28,6 +28,23 @@ export const getReader = (options = {}) => {
       Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
     },
 
+    checkIfAssetExists (filePath) {
+      const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
+      const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}/assets/${asset}`
+      return fetch(url, { method: "HEAD", credentials: 'same-origin', redirect: "follow"})
+        .then((response) => {
+          //the client should then look into response.ok, response.status and response.url 
+          return Promise.resolve(response)
+        })
+        .catch(error => {
+          error.name = "reader/error/asset";
+          error.details = asset;
+          error.message = "connection/error";
+          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          throw error;
+        });
+    },
+
     getAsset (filePath) {
       const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
       const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}/assets/${asset}`
