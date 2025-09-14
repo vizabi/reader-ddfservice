@@ -25,7 +25,13 @@ export const getReader = (options = {}) => {
       if (dataset.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
       }
+      if (dataset.token) {
+        this.headers.Authorization = 'Bearer ' + dataset.token
+      }
       Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
+    },
+    setToken (token){
+      this.headers.Authorization = 'Bearer ' + token;
     },
 
     checkIfAssetExists (filePath) {

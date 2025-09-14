@@ -1,6 +1,6 @@
 {
   "name": "@vizabi/reader-ddfservice",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Vizabi reader for a DDF Service",
   "browser": "dist/reader-ddfservice.js",
   "publishConfig": {
