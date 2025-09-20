@@ -146,7 +146,7 @@ export const getReader = (options = {}) => {
           } else {
             return response.text()
               .then(txt => {
-                const err = new Error(response.text() || `DDF Service responded with ${response.status}`)
+                const err = new Error(txt || `DDF Service responded with ${response.status}`)
                 err.code = `HTTP_${response.status}`
                 return err
               })
