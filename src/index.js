@@ -25,13 +25,19 @@ export const getReader = (options = {}) => {
       if (dataset.password) {
         this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
       }
-      if (dataset.token) {
-        this.headers.Authorization = 'Bearer ' + dataset.token
+      if (dataset.authToken) {
+        this.headers.Authorization = 'Bearer ' + dataset.authToken
+      }
+      if (dataset.permalinkToken) {
+        this.headers["x-share-token"] = dataset.permalinkToken
       }
       Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
     },
-    setToken (token){
-      this.headers.Authorization = 'Bearer ' + token;
+    setAuthToken (authToken){
+      this.headers.Authorization = 'Bearer ' + authToken;
+    },
+    setPermalinkToken (permalinkToken){
+      this.headers["x-share-token"] = permalinkToken;
     },
 
     checkIfAssetExists (filePath) {
