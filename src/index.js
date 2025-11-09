@@ -11,27 +11,39 @@ const defaultParsers = {
   'YYYYqQ': utcParse("%Yq%q"),
   'YYYYwWW': utcParse("%Yw%W")
 };
+const ensureNoTrailingSlash = (string = "") => string.endsWith("/") ? string.slice(0, -1) : string;
 
-export const getReader = (options = {}) => {
+export const getReader = () => {
   return {
-    init (dataset) {
+    init (config) {
       const defaults = {
-        service: 'https://big-waffle.gapminder.org'
+        url: 'https://small-waffle.gapminder.org',
+        apiVersion: 'v2'
       }
-      this.service = options.service || dataset.service || defaults.service
-      this.dataset = dataset.name || defaults.name
-      this.version = dataset.version || defaults.version
+      this.url = ensureNoTrailingSlash(config.url || defaults.url); 
+      this.apiVersion = ensureNoTrailingSlash(config.apiVersion || defaults.apiVersion); 
+      this.dataset = ensureNoTrailingSlash(config.dataset || defaults.dataset); 
+      this.branch = ensureNoTrailingSlash(config.branch || defaults.branch); 
+      this.commit = ensureNoTrailingSlash(config.commit || defaults.commit); 
       this.headers = {}
-      if (dataset.password) {
-        this.headers.Authorization = 'Basic ' + btoa(this.dataset + ":" + options.password)
+
+      if (!this.dataset)
+        throw new Error("DDF Reader: dataset is required in config");
+
+      const pathWithoutCommit = this.url
+        + (this.apiVersion ? "/" + this.apiVersion : '')
+        + (this.dataset ? "/" + this.dataset : '')
+        + (this.branch ? "/" + this.branch : '');
+
+      this.getEndpoint = () => pathWithoutCommit + (this.commit ? "/" + this.commit : '');
+
+      if (config.authToken) {
+        this.headers.Authorization = 'Bearer ' + config.authToken
       }
-      if (dataset.authToken) {
-        this.headers.Authorization = 'Bearer ' + dataset.authToken
+      if (config.permalinkToken) {
+        this.headers["x-share-token"] = config.permalinkToken
       }
-      if (dataset.permalinkToken) {
-        this.headers["x-share-token"] = dataset.permalinkToken
-      }
-      Object.assign(this.parsers, dataset.parsers || {}) // add or overwrite parsers
+      Object.assign(this.parsers, config.parsers || {}) // add or overwrite parsers
     },
     setAuthToken (authToken){
       this.headers.Authorization = 'Bearer ' + authToken;
@@ -42,7 +54,7 @@ export const getReader = (options = {}) => {
 
     checkIfAssetExists (filePath) {
       const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
-      const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}/assets/${asset}`
+      const url = `${this.getEndpoint()}/assets/${asset}`
       return fetch(url, { method: "HEAD", credentials: 'same-origin', redirect: "follow"})
         .then((response) => {
           //the client should then look into response.ok, response.status and response.url 
@@ -52,14 +64,14 @@ export const getReader = (options = {}) => {
           error.name = "reader/error/asset";
           error.details = asset;
           error.message = "connection/error";
-          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          error.endpoint = this.getEndpoint();
           throw error;
         });
     },
 
     getAsset (filePath) {
       const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
-      const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}/assets/${asset}`
+      const url = `${this.getEndpoint()}/assets/${asset}`
       return fetch(url, { credentials: 'same-origin', redirect: "follow" })
         .then(response => {
           if (response.ok) {
@@ -83,7 +95,7 @@ export const getReader = (options = {}) => {
           error.name = "reader/error/asset";
           error.details = asset;
           error.message = "connection/error";
-          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          error.endpoint = this.getEndpoint();
           throw error;
         })
     },
@@ -123,7 +135,7 @@ export const getReader = (options = {}) => {
     },
 
     read (query) {
-      const url = `${this.service}/${this.dataset}${this.version ? `/${this.version}` : ''}?${this._queryAsParams(query)}`
+      const url = `${this.getEndpoint()}?${this._queryAsParams(query)}`
       return fetch(url, { credentials: 'same-origin', headers: this.headers, redirect: "follow" })
         .then(response => {
           if (response.ok) {
@@ -132,8 +144,8 @@ export const getReader = (options = {}) => {
             */
             return response.json()
               .then(data => {
-                if (data.version) {
-                  this.version = data.version
+                if (data.commit) {
+                  this.commit = data.commit
                 }
                 ['info', 'warn', 'error'].forEach(level => {
                   (data[level] || []).forEach(logRecord => {
@@ -162,7 +174,7 @@ export const getReader = (options = {}) => {
           error.name = "reader/error/generic";
           error.details = query;
           error.message = "connection/error";
-          error.endpoint = `${this.service}/${this.dataset}${this.version ? '/' + this.version : ''}`;
+          error.endpoint = this.getEndpoint();
           throw error;
         })
     },
