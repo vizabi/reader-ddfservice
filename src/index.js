@@ -55,7 +55,7 @@ export const getReader = () => {
     checkIfAssetExists (filePath) {
       const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
       const url = `${this.getEndpoint()}/assets/${asset}`
-      return fetch(url, { method: "HEAD", credentials: 'same-origin', redirect: "follow"})
+      return fetch(url, { method: "HEAD", credentials: 'same-origin', headers: this.headers, redirect: "follow"})
         .then((response) => {
           //the client should then look into response.ok, response.status and response.url 
           return Promise.resolve(response)
@@ -72,7 +72,7 @@ export const getReader = () => {
     getAsset (filePath) {
       const asset = filePath.replace(/^assets\//, '') // some datasets still include the root path in asset names 
       const url = `${this.getEndpoint()}/assets/${asset}`
-      return fetch(url, { credentials: 'same-origin', redirect: "follow" })
+      return fetch(url, { credentials: 'same-origin', headers: this.headers, redirect: "follow" })
         .then(response => {
           if (response.ok) {
             const contentType = response.headers.get("Content-Type")
