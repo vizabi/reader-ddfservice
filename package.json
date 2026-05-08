@@ -1,34 +1,53 @@
 {
   "name": "@vizabi/reader-ddfservice",
-  "version": "2.6.1",
+  "version": "3.0.0",
   "description": "Vizabi reader for a DDF Service",
+  "type": "module",
   "browser": "dist/reader-ddfservice.js",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "urlon": "^2.0.1",
-    "whatwg-fetch": "^3.6.2",
-    "d3-time-format": "^4.0.0"
+    "urlon": "^3.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.5",
-    "@babel/preset-env": "^7.15.6",
-    "babel-loader": "^8.2.2",
-    "webpack": "^5.55.1",
-    "webpack-cli": "^4.8.0"
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "rollup": "^4.0.0"
   },
   "scripts": {
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build"
+    "build": "rollup -c rollup.config.mjs",
+    "test": "node test/index.test.mjs",
+    "prepublishOnly": "npm test && npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vizabi/reader-ddfservice.git"
   },
-  "author": "Robert Aarts <robert@gapminder.org> (http://www.gapminder.org)",
-  "license": "GPL-3.0-or-later",
+    "author": {
+    "name": "Robert Aarts and others at Gapminder Foundation",
+    "url": "https://www.gapminder.org",
+    "email": "info@gapminder.org"
+  },
+  "contributors": [
+    {
+      "name": "Robert",
+      "url": "https://github.com/lokkilok"
+    },
+    {
+      "name": "Jasper",
+      "url": "https://github.com/jheeffer"
+    },
+    {
+      "name": "Angie",
+      "url": "https://github.com/angiehjort"
+    },
+    {
+      "name": "Dima",
+      "url": "https://github.com/dab2000"
+    }
+  ],
+  "license": "CC-BY-4.0",
   "bugs": {
     "url": "https://github.com/vizabi/reader-ddfservice/issues"
   },

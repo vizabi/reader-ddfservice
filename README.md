@@ -1,78 +1,66 @@
 # Vizabi DDF Service Reader
 
-This Vizabi DDF Service Reader is used to connect your Vizabi visualization to data that is published by a [DDF Service](https://github.com/Gapminder/big-waffle/blob/master/SERVICE_SPEC.md).  
+Client-side middleware that connects a [Vizabi](https://github.com/vizabi/vizabi) visualization to a [small-waffle](https://github.com/Gapminder/small-waffle) backend. Takes DDFQL queries from Vizabi, encodes them as URL parameters using [urlon](https://github.com/cerebral/urlon), hits the API, and converts the `{header, rows}` response back into an array of objects with parsed time values.
 
-## Usage
+Shipped as a pre-built UMD bundle (`dist/reader-ddfservice.js`) for use as a `<script>` tag in tools-page.
 
-To use the reader include the script:
+## Usage in tools-page
 
-    <script src="reader-ddfservice.js"></script>
-
-Then simply create an instance and pass it to Vizabi. 
-
-    var ddfReader = DDFServiceReader.getReader();
-    Vizabi.stores.dataSources.createAndAddType("ddfBW", ddfReader)
-
-Next define a data specification, e.g. like this:
-
-    const data = {
-        modelType: "ddfBW",
-        name: "unhcr" // e.g. version could also be in here
-    }
-
-And use that in the config of your Vizabi visualization:
-
-    var config = {
-    markers: {
-        marker_destination: {
-        data: {
-            locale: "en",
-            source: data,
-            space: ["asylum_residence", "time"]
-        },
-        ...
-        ...
-        ...
-
-## Options
-
-Options for the reader can be given as object argument to __DDFServiceReader.getReader()__:
-
-    var ddfReader = DDFServiceReader.getReader({service: 'http://localhost:3001'}); //reader config that's not dataset specific goes here
-
-For now __service__ is the only option with reader scope.
-
-In addition a dataset specific configuration object must be supplied in the __init()__ call. Vizabi supplies the
-config of a data source, as shown above. The supported options are:
-
-    {
-        name: "unhcr",          // the name of the dataset, the only property that is mandatory
-        version: "2019111203",   // a version string, if absent the default version supplied by the service will be used
-        service: "http://localhost:3001" // it's possible to pass the service URL in here too.
-    }
-
-## Usage without vizabi
-[jsfiddle example](https://jsfiddle.net/7gn91sr0/3/)
-
+```html
+<script src="reader-ddfservice.js"></script>
 ```
-var ddfReader = DDFServiceReader.getReader();
 
+```js
+Vizabi.stores.dataSources.createAndAddType("ddfbw", DDFServiceReader.getReader());
+```
 
-ddfReader.init({
-  service: 'https://big-waffle.gapminder.org', 
-  name: "wdi-master"
+Vizabi then calls `init(config)` and `read(query)` automatically when a data source is defined:
+
+```js
+const data = {
+  modelType: "ddfbw",
+  dataset: "open-numbers/ddf--gapminder--systema_globalis",
+  branch: "master"
+};
+```
+
+## Config options (`init`)
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `dataset` | _(required)_ | Dataset slug, e.g. `open-numbers/ddf--gapminder--systema_globalis` |
+| `url` | `https://small-waffle.gapminder.org` | Backend base URL |
+| `apiVersion` | `v3` | API version prefix |
+| `branch` | — | Git branch |
+| `commit` | — | Git commit (short or full). Updated automatically from responses. |
+| `authToken` | — | Bearer token sent as `Authorization` header |
+| `permalinkToken` | — | Sent as `x-share-token` header |
+| `parsers` | — | Override or extend the built-in time parsers |
+
+## Usage without Vizabi
+
+```js
+import { getReader } from '@vizabi/reader-ddfservice';
+
+const reader = getReader();
+reader.init({
+  dataset: 'open-numbers/ddf--gapminder--systema_globalis',
+  branch: 'master'
 });
 
-
-ddfReader.read({
-  select: {
-    key: ["geo", "time"], 
-    value: ["sh_sta_brtc_zs"]
-  }, 
-  where: {
-    geo: {"$in": ["rwa"]}},
-    from: "datapoints"
-  })
-  .then(console.log);
-
+const rows = await reader.read({
+  select: { key: ['geo', 'time'], value: ['sg_gdi_pcap'] },
+  from: 'datapoints',
+  where: { geo: { $in: ['swe', 'nor'] } }
+});
+console.log(rows); // [{geo: 'swe', time: Date, sg_gdi_pcap: 42}, ...]
 ```
+
+## Development
+
+```bash
+npm test       # run unit tests (node, no extra deps)
+npm run build  # bundle → dist/reader-ddfservice.js
+```
+
+Tests cover endpoint building, urlon v3 query encoding, and all time parsers (`year`, `month`, `day`, `quarter`, `week`, `time`).

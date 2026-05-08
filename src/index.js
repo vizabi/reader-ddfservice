@@ -1,6 +1,4 @@
-import 'whatwg-fetch' // Polyfill for fetch
-import { utcParse } from 'd3-time-format'
-import * as Urlon from 'urlon'
+import Urlon from 'urlon'
 
 // Time parsing must follow DDF specs here
 // https://docs.google.com/document/d/1Cd2kEH5w3SRJYaDcu-M4dU5SY8No84T3g-QlNSW6pIE/edit#heading=h.oafc7aswaafy
@@ -8,8 +6,16 @@ const defaultParsers = {
   'YYYYMMDD': t => new Date(Date.UTC(Math.floor(t/10000), Math.floor((t % 10000)/100) - 1, t % 100)),
   'YYYY-MM': t => new Date(Date.UTC(+t.slice(0,4), +t.slice(-2) - 1)),
   'YYYY': t => new Date(Date.UTC(t, 0)),
-  'YYYYqQ': utcParse("%Yq%q"),
-  'YYYYwWW': utcParse("%Yw%W")
+  // ISO 8601 quarter: YYYYqQ e.g. "2015q2" → Apr 1 2015
+  'YYYYqQ': t => new Date(Date.UTC(+t.slice(0, 4), (+t.slice(5) - 1) * 3)),
+  // ISO 8601 week: YYYYwWW e.g. "2015w01" → Monday of that ISO week
+  'YYYYwWW': t => {
+    const year = +t.slice(0, 4);
+    const week = +t.slice(5);
+    const jan4 = new Date(Date.UTC(year, 0, 4)); // Jan 4 is always in ISO week 1
+    const dow = jan4.getUTCDay() || 7;           // Mon=1 ... Sun=7
+    return new Date(Date.UTC(year, 0, 4 - dow + 1 + (week - 1) * 7));
+  }
 };
 const ensureNoTrailingSlash = (string = "") => string.endsWith("/") ? string.slice(0, -1) : string;
 
@@ -18,7 +24,7 @@ export const getReader = () => {
     init (config) {
       const defaults = {
         url: 'https://small-waffle.gapminder.org',
-        apiVersion: 'v2'
+        apiVersion: 'v3'
       }
       this.url = ensureNoTrailingSlash(config.url || defaults.url); 
       this.apiVersion = ensureNoTrailingSlash(config.apiVersion || defaults.apiVersion); 
